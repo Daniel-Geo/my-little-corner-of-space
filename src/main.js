@@ -2,6 +2,8 @@ import "./style.css";
 import * as THREE from "three";
 import { GLTFLoader, TTFLoader, FontLoader, TextGeometry, FlyControls} from "three/examples/jsm/Addons.js";
 
+const base = import.meta.env.BASE_URL
+
 const scene = new THREE.Scene();
 const listener = new THREE.AudioListener();
 const backgroundMusic = new THREE.Audio(listener);
@@ -11,7 +13,7 @@ camera.position.z = 5;
 camera.add(listener);
 
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load("music/bg-music.mp3", (buffer) => {
+audioLoader.load(`${base}music/bg-music.mp3`, (buffer) => {
     backgroundMusic.setBuffer(buffer);
     backgroundMusic.setLoop(true);
     backgroundMusic.play();
@@ -42,7 +44,7 @@ plane.rotation.x = Math.PI / 2
 plane.receiveShadow = true;
 scene.add(plane)
 
-const pfpTexture = new THREE.TextureLoader().load("images/pfp.png");
+const pfpTexture = new THREE.TextureLoader().load(`${base}images/pfp.png`);
 const cube = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshStandardMaterial({ map: pfpTexture })
@@ -89,13 +91,13 @@ function addStar() {
 
 Array(200).fill().forEach(addStar);
 
-const milkywayTexture = new THREE.TextureLoader().load("images/milkyway.jpg");
+const milkywayTexture = new THREE.TextureLoader().load(`${base}images/milkyway.jpg`);
 milkywayTexture.colorSpace = THREE.SRGBColorSpace;
 scene.background = milkywayTexture;
 
 const loader = new GLTFLoader();
 
-const chairModel = loader.load("models/chair.glb", (gltf) => {
+const chairModel = loader.load(`${base}models/chair.glb`, (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.125);
     model.position.y = 0.1;
@@ -110,7 +112,7 @@ const chairModel = loader.load("models/chair.glb", (gltf) => {
     scene.add(model);
 });
 
-const tableModel = loader.load("models/table.glb", (gltf) => {
+const tableModel = loader.load(`${base}models/table.glb`, (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.2);
     model.position.y = 0.01;
@@ -125,7 +127,7 @@ const tableModel = loader.load("models/table.glb", (gltf) => {
     scene.add(model);
 });
 
-const stairsModel = loader.load("models/stairs.glb", (gltf) => {
+const stairsModel = loader.load(`${base}models/stairs.glb`, (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.4);
     model.position.x = -4;
@@ -140,7 +142,7 @@ const stairsModel = loader.load("models/stairs.glb", (gltf) => {
 });
 
 const ttfLoader = new TTFLoader();
-ttfLoader.load("fonts/sekuya-regular-font.ttf", (jsonFontData) => {
+ttfLoader.load(`${base}fonts/sekuya-regular-font.ttf`, (jsonFontData) => {
     const fontLoader = new FontLoader();
     const font = fontLoader.parse(jsonFontData);
 
