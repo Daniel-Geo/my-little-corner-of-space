@@ -23,22 +23,41 @@ window.addEventListener("resize", () => {
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10),
     new THREE.MeshStandardMaterial({
-        color: 0xffffff,
+        color: 0xaaaaaa,
         side: THREE.DoubleSide
     }));
 plane.rotation.x = Math.PI / 2
 scene.add(plane)
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
+const pfpTexture = new THREE.TextureLoader().load("pfp.png")
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshStandardMaterial({ map: pfpTexture })
+);
+cube.scale.setScalar(0.5)
+cube.position.y = 2.5;
+cube.position.z = -2;
 scene.add(cube);
 
+const torus = new THREE.Mesh(
+    new THREE.TorusGeometry(0.6, 0.2, 20, 50),
+    new THREE.MeshBasicMaterial({
+        color: 0xff6347,
+        wireframe: true
+    })
+)
+torus.position.y = 2.5;
+torus.position.z = -2;
+scene.add(torus)
+
 const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(1, 1, 1);
+pointLight.position.set(0, 5, 0);
+pointLight.intensity = 100
 
 const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
+ambientLight.intensity = 2
+
 
 function addStar() {
     const geometry = new THREE.SphereGeometry(0.25, 25, 25);
@@ -59,18 +78,30 @@ scene.background = milkywayTexture;
 const loader = new GLTFLoader();
 
 const chairModel = loader.load("chair.glb", (gltf) => {
-    gltf.scene.scale.setScalar(0.1);
-    scene.add(gltf.scene);
+    const model = gltf.scene;
+    model.scale.setScalar(0.125);
+    model.position.y = 0.1;
+    model.position.z = -3.5;
+    model.rotation.y = Math.PI / 2
+    scene.add(model);
 });
 
 const tableModel = loader.load("table.glb", (gltf) => {
-    gltf.scene.scale.setScalar(0.2);
-    scene.add(gltf.scene);
+    const model = gltf.scene;
+    model.scale.setScalar(0.2);
+    model.position.y = 0.01;
+    model.position.z = -2;
+    model.rotation.y = Math.PI / 2
+    scene.add(model);
 });
 
 const stairsModel = loader.load("stairs.glb", (gltf) => {
-    gltf.scene.scale.setScalar(0.5);
-    scene.add(gltf.scene);
+    const model = gltf.scene;
+    model.scale.setScalar(0.4);
+    model.position.x = -4;
+    model.position.y = 0.01;
+    model.position.z = 4;
+    scene.add(model);
 });
 
 const flyControls = new FlyControls(camera, renderer.domElement);
@@ -83,8 +114,10 @@ flyControls.dragToLook = false;
 const timer = new THREE.Timer();
 
 function animate(time) {
-    cube.rotation.x = time / 2000;
+    cube.rotation.z = time / 2000;
     cube.rotation.y = time / 1000;
+    torus.rotation.x = time / 500;
+    torus.rotation.y = time / 250;
 
     timer.update();
     const delta = timer.getDelta();
