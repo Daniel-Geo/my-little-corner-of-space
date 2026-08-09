@@ -3,9 +3,19 @@ import * as THREE from "three";
 import { GLTFLoader, TTFLoader, FontLoader, TextGeometry, FlyControls} from "three/examples/jsm/Addons.js";
 
 const scene = new THREE.Scene();
+const listener = new THREE.AudioListener();
+const backgroundMusic = new THREE.Audio(listener);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.y = 2
+camera.position.y = 2;
 camera.position.z = 5;
+camera.add(listener);
+
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load("music/bg-music.mp3", (buffer) => {
+    backgroundMusic.setBuffer(buffer);
+    backgroundMusic.setLoop(true);
+    backgroundMusic.play();
+});
 
 const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector("#bg")
@@ -181,3 +191,16 @@ function animate(time) {
     renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
+
+function unlockAudio() {
+    if (listener.context.state === "suspended") {
+        listener.context.resume();
+    }
+    if (!backgroundMusic.isPlaying && backgroundMusic.buffer) {
+        backgroundMusic.play();
+    }
+}
+
+["click", "keydown", "touchstart"].forEach((event) => {
+    window.addEventListener(event, unlockAudio, { once: true });
+});
