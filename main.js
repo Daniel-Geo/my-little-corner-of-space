@@ -1,6 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import { GLTFLoader, FlyControls } from "three/examples/jsm/Addons.js";
+import { GLTFLoader, TTFLoader, FontLoader, TextGeometry, FlyControls} from "three/examples/jsm/Addons.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -12,6 +12,8 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -27,16 +29,19 @@ const plane = new THREE.Mesh(
         side: THREE.DoubleSide
     }));
 plane.rotation.x = Math.PI / 2
+plane.receiveShadow = true;
 scene.add(plane)
 
-const pfpTexture = new THREE.TextureLoader().load("pfp.png")
+const pfpTexture = new THREE.TextureLoader().load("images/pfp.png");
 const cube = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshStandardMaterial({ map: pfpTexture })
 );
-cube.scale.setScalar(0.5)
+cube.scale.setScalar(0.5);
 cube.position.y = 2.5;
 cube.position.z = -2;
+cube.castShadow = true;
+cube.receiveShadow = true;
 scene.add(cube);
 
 const torus = new THREE.Mesh(
@@ -48,15 +53,18 @@ const torus = new THREE.Mesh(
 )
 torus.position.y = 2.5;
 torus.position.z = -2;
+torus.castShadow = true;
+torus.receiveShadow = true;
 scene.add(torus)
 
 const pointLight = new THREE.PointLight(0xffffff);
 pointLight.position.set(0, 5, 0);
-pointLight.intensity = 100
+pointLight.castShadow = true;
+pointLight.intensity = 100;
 
 const ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(pointLight, ambientLight);
-ambientLight.intensity = 2
+ambientLight.intensity = 2;
 
 
 function addStar() {
@@ -71,37 +79,84 @@ function addStar() {
 
 Array(200).fill().forEach(addStar);
 
-const milkywayTexture = new THREE.TextureLoader().load("milkyway.jpg");
+const milkywayTexture = new THREE.TextureLoader().load("images/milkyway.jpg");
 milkywayTexture.colorSpace = THREE.SRGBColorSpace;
 scene.background = milkywayTexture;
 
 const loader = new GLTFLoader();
 
-const chairModel = loader.load("chair.glb", (gltf) => {
+const chairModel = loader.load("models/chair.glb", (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.125);
     model.position.y = 0.1;
     model.position.z = -3.5;
-    model.rotation.y = Math.PI / 2
+    model.rotation.y = Math.PI / 2;
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    })
     scene.add(model);
 });
 
-const tableModel = loader.load("table.glb", (gltf) => {
+const tableModel = loader.load("models/table.glb", (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.2);
     model.position.y = 0.01;
     model.position.z = -2;
-    model.rotation.y = Math.PI / 2
+    model.rotation.y = Math.PI / 2;
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    })
     scene.add(model);
 });
 
-const stairsModel = loader.load("stairs.glb", (gltf) => {
+const stairsModel = loader.load("models/stairs.glb", (gltf) => {
     const model = gltf.scene;
     model.scale.setScalar(0.4);
     model.position.x = -4;
     model.position.y = 0.01;
     model.position.z = 4;
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+        }
+    })
     scene.add(model);
+});
+
+const ttfLoader = new TTFLoader();
+ttfLoader.load("fonts/sekuya-regular-font.ttf", (jsonFontData) => {
+    const fontLoader = new FontLoader();
+    const font = fontLoader.parse(jsonFontData);
+
+    const textGeometry = new TextGeometry("made with love by Daniel-Geo", {
+        font: font,
+        size: 0.1,
+        depth: 0.02,
+        curveSegments: 20,
+        bevelEnabled: true,
+        bevelThickness: 0.02,
+        bevelSize: 0.001,
+        bevelSegments: 5
+    });
+
+    const textMaterial = [
+        new THREE.MeshPhongMaterial({ color: 0xffff00 }),
+        new THREE.MeshPhongMaterial({ color: 0xff6347 })
+    ];
+
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.x = -1.75;
+    textMesh.position.y = 1.5;
+    textMesh.position.z = -2;
+    textMesh.castShadow = true;
+    textMesh.receiveShadow = true;
+    scene.add(textMesh);
 });
 
 const flyControls = new FlyControls(camera, renderer.domElement);
