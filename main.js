@@ -1,9 +1,10 @@
 import "./style.css";
 import * as THREE from "three";
-import { FlyControls } from "three/examples/jsm/Addons.js";
+import { GLTFLoader, FlyControls } from "three/examples/jsm/Addons.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.y = 2
 camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer({
@@ -18,6 +19,15 @@ window.addEventListener("resize", () => {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide
+    }));
+plane.rotation.x = Math.PI / 2
+scene.add(plane)
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
@@ -46,6 +56,23 @@ const milkywayTexture = new THREE.TextureLoader().load("milkyway.jpg");
 milkywayTexture.colorSpace = THREE.SRGBColorSpace;
 scene.background = milkywayTexture;
 
+const loader = new GLTFLoader();
+
+const chairModel = loader.load("chair.glb", (gltf) => {
+    gltf.scene.scale.setScalar(0.1);
+    scene.add(gltf.scene);
+});
+
+const tableModel = loader.load("table.glb", (gltf) => {
+    gltf.scene.scale.setScalar(0.2);
+    scene.add(gltf.scene);
+});
+
+const stairsModel = loader.load("stairs.glb", (gltf) => {
+    gltf.scene.scale.setScalar(0.5);
+    scene.add(gltf.scene);
+});
+
 const flyControls = new FlyControls(camera, renderer.domElement);
 
 flyControls.movementSpeed = 10;
@@ -60,7 +87,7 @@ function animate(time) {
     cube.rotation.y = time / 1000;
 
     timer.update();
-    const delta = timer.getDelta()
+    const delta = timer.getDelta();
 
     flyControls.update(delta);
     renderer.render(scene, camera);
